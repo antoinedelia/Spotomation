@@ -9,9 +9,9 @@ class Song():
     title: str
     artists: list
     album: str
-    year: int
+    release_date: str
     length_ms: int
-    genre: str = None
+    genres: list = field(default_factory=list)
     lyrics: str = None
     cover_url: str = None
     possible_download_urls: list = field(default_factory=list)

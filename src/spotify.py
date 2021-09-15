@@ -1,11 +1,13 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from logger import Logger
 
 
 class Spotify:
     def __init__(self, scopes: str = 'user-library-read') -> None:
         self.client: spotipy.Spotify = None
         self.scopes = scopes
+        self.logger = Logger("Spotify")
 
     def authenticate_oauth(self) -> None:
         """
@@ -13,7 +15,7 @@ class Spotify:
         :return: None
         """
         self.client = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=self.scopes))
-        print("Successfully authenticated!")
+        self.logger.info("Successfully authenticated!")
 
     def get_playlist_tracks_by_uri(self, uri: str) -> list:
         """

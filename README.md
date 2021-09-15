@@ -15,3 +15,11 @@ $ export SPOTIPY_REDIRECT_URI='http://localhost:8080'
 
 $ python src/main.py
 ```
+
+## Built with
+
+- Requests (http api calls)
+- Spotipy (Spotify Python client)
+- MusicBrainz (metadata)
+- Cover Art Archive (cover art)
+- Genius/Musixmatch (lyrics)
