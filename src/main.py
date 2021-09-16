@@ -39,11 +39,14 @@ def main():
             logger.info(f"Metadata: {response}")
             cover = mb.get_cover_art_url_by_id(song_id)
             logger.info(f"Cover: {cover}")
-    # 4 - Get the lyrics (genius.com / musixmatch.com) for each track
 
-    # 4 - Find the best match for each track (youtube, vk, zippyshare, torrent...)
+    # 3.b - Alternative to MusicBrainz in case the song was not found?
 
-    # 5 - Download the best match
+    # 4 - Get the lyrics for each track
+
+    # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...)
+
+    # 6 - Download the best match
 
 
 if __name__ == '__main__':

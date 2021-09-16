@@ -4,17 +4,26 @@
 
 Create a new application in the [Spotify Dashboard](https://developer.spotify.com/dashboard/applications).
 
-Make sure to set the `Redirect URIs` to `http://localhost:8080` in the settings.
-
 ```shell
 $ pip install -r requirements.txt
 
+# Spotify Credentials
 $ export SPOTIPY_CLIENT_ID='your-client-id'
 $ export SPOTIPY_CLIENT_SECRET='your-client-secret' 
-$ export SPOTIPY_REDIRECT_URI='http://localhost:8080'
+
+# Genius Credentials
+$ export GENIUS_CLIENT_ID='your-client-id'
+$ export GENIUS_CLIENT_SECRET='your-client-secret' 
+
+# Musixmatch Credentials
+$ export MUSIXMATCH_API_KEY='your-api-key' 
 
 $ python src/main.py
 ```
+
+## Known Issues
+
+We can't really get the lyrics, as both the Genius and MusixMatch APIs are limited. [Genius simply doesn't allow to return the lyrics for a song](https://genius.com/discussions/277279-Get-the-lyrics-of-a-song), while [Musixmatch only return 30% of the lyrics for a song](https://developer.musixmatch.com/faq).
 
 ## Built with
 
