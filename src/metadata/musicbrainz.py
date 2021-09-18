@@ -80,7 +80,7 @@ class MusicBrainz():
         possible_releases = []
         for release in releases:
             artists_from_release = [artist["artist"]["name"] for artist in release["artist-credit"]]
-            if set(artists_from_release) == set(artists):
+            if set([artist.upper() for artist in artists_from_release]) == set([artist.upper() for artist in artists]):
                 possible_releases.append(release)
         return possible_releases
 
