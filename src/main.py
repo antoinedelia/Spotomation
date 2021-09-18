@@ -7,9 +7,16 @@ from musixmatch import MusixmatchApi, MusixmatchScrapper
 
 def main():
     logger = Logger("Main")
-    # 1 - Authenticate to Spotify
+    # 1 - Authenticate to API services
     sp = Spotify()
     sp.authenticate_oauth()
+
+    musicbrainz = MusicBrainz()
+
+    musixmatch_api = MusixmatchApi()
+    musixmatch_api.authenticate()
+
+    musixmatch_web = MusixmatchScrapper()
 
     # 1 - Get the Spotify Playlist URI from user
     # playlist_uri = input("Enter the Spotify Playlist URI: ")
@@ -28,30 +35,28 @@ def main():
             release_date=track["album"]["name"],
             length_ms=track["duration_ms"],
         )
-        songs.append(song)
 
-    # 3 - Get additional metadata + cover (musicbrainz.org) for each track
-    mb = MusicBrainz()
-    for song in songs:
-        song_id = mb.find_song_id(title=song.title, artists=song.artists, album=song.album)
-        logger.info(f"Song id is:{song_id}")
+        # 3 - Get additional metadata + cover
+        song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
         if song_id:
-            response = mb.get_metadata_by_song_id(song_id)
-            logger.info(f"Metadata: {response}")
-            cover = mb.get_cover_art_url_by_id(song_id)
-            logger.info(f"Cover: {cover}")
+            song_metadata = musicbrainz.get_metadata_by_song_id(song_id)
+            logger.info(f"Metadata found: {song_metadata}")
+            song.cover_url = musicbrainz.get_cover_art_url_by_id(song_id)
+        else:
+            logger.warning(f"No metadata found for {song.title} - {song.artists}")
 
-    # 3.b - Alternative to MusicBrainz in case the song was not found?
+        # 3.b - Alternative to MusicBrainz in case the song was not found?
 
-    # 4 - Get the lyrics for each track
-    musixmatch_api = MusixmatchApi()
-    musixmatch_api.authenticate()
-    musixmatch_web = MusixmatchScrapper()
-    for song in songs:
+        # 4 - Get the lyrics
         song_url = musixmatch_api.get_song_url(song)
-        logger.info(f"Song url for {song.title} is: {song_url}")
-        lyrics = musixmatch_web.get_lyrics_by_song_url(song_url)
-        logger.info(f"Lyrics for {song.title} is: {lyrics}")
+        if song_url:
+            song.lyrics = musixmatch_web.get_lyrics_by_song_url(song_url)
+            lyrics_preview = song.lyrics.split("\n")[0]
+            logger.info(f"Lyrics found, first sentence is: {lyrics_preview}")
+        else:
+            logger.warning(f"No lyrics found for {song.title} - {song.artists}")
+
+        songs.append(song)
 
     # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...)
 
