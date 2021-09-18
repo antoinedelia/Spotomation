@@ -116,4 +116,4 @@ class MusicBrainz():
             self.logger.error(f"Cover Art Archive API returned {response.status_code}. Response: {response.text}")
             return None
 
-        return response.json()["images"][0]["image"]
+        return response.json()["images"][0]["thumbnails"]["large"]
