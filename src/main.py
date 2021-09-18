@@ -2,6 +2,7 @@ from spotify import Spotify
 from musicbrainz import MusicBrainz
 from song import Song
 from logger import Logger
+from musixmatch import MusixmatchApi, MusixmatchScrapper
 
 
 def main():
@@ -43,6 +44,14 @@ def main():
     # 3.b - Alternative to MusicBrainz in case the song was not found?
 
     # 4 - Get the lyrics for each track
+    musixmatch_api = MusixmatchApi()
+    musixmatch_api.authenticate()
+    musixmatch_web = MusixmatchScrapper()
+    for song in songs:
+        song_url = musixmatch_api.get_song_url(song)
+        logger.info(f"Song url for {song.title} is: {song_url}")
+        lyrics = musixmatch_web.get_lyrics_by_song_url(song_url)
+        logger.info(f"Lyrics for {song.title} is: {lyrics}")
 
     # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...)
 

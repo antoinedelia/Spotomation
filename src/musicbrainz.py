@@ -52,18 +52,20 @@ class MusicBrainz():
         # If there are multiple matches, we try to filter with the artists or the album
         # This is very messy, should think of a better way to do it
         if len(exact_matches) > 1:
-            self.logger.warning("Multiple exact matches found. Adding additional filters.")
+            self.logger.warning(f"Multiple matches ({len(exact_matches)}) found. Adding additional filters.")
             new_exact_matches = self._filter_releases_by_artists(exact_matches, artists)
             if len(new_exact_matches) == 1:
-                self.logger.info(f"Found exact match with title {title}: {new_exact_matches[0]}")
+                self.logger.info(f"Found exact match with title {title} and artists {artists}.")
                 return new_exact_matches[0]["id"]
             if len(new_exact_matches) == 0:
                 final_exact_matches = self._filter_releases_by_album(exact_matches, album)
                 if len(final_exact_matches) >= 1:
+                    self.logger.info(f"Found multiple matches {(len(final_exact_matches))} even with album.")
                     return final_exact_matches[0]["id"]
                 if len(final_exact_matches) == 0:
                     return exact_matches[0]["id"]
             if len(new_exact_matches) > 1:
+                self.logger.info(f"Found multiple matches ({len(new_exact_matches)}) with artists.")
                 final_exact_matches = self._filter_releases_by_album(new_exact_matches, album)
                 if len(final_exact_matches) >= 1:
                     return final_exact_matches[0]["id"]
@@ -74,7 +76,13 @@ class MusicBrainz():
         return [release for release in releases if release["title"].upper() == title.upper()]
 
     def _filter_releases_by_artists(self, releases: list, artists: list) -> list:
-        return [release for release in releases if release["artist-credit"][0]["artist"]["name"].upper() == artists[0].upper()]
+        possible_releases = []
+        for release in releases:
+            artists_from_release = [artist["artist"]["name"] for artist in release["artist-credit"]]
+            if set(artists_from_release) == set(artists):
+                possible_releases.append(release)
+        return possible_releases
+        # return [release for release in releases if release["artist-credit"][0]["artist"]["name"].upper() == artists[0].upper()]
 
     def _filter_releases_by_album(self, releases: list, album: str) -> list:
         return [release for release in releases if release["release-group"]["title"].upper() == album.upper()]
@@ -100,7 +108,11 @@ class MusicBrainz():
 
     def get_cover_art_url_by_id(self, id: str) -> str:
         response = requests.get(self.covert_art_url + "release/" + id)
+        if response.status_code == 404:
+            self.logger.warning(f"Cover art not found for release {id}")
+            return None
         if response.status_code != 200:
-            self.logger.error(f"Cover Art Archive API returned {response.status_code}. Response: {response.json()}")
+            self.logger.error(f"Cover Art Archive API returned {response.status_code}. Response: {response.text}")
+            return None
 
         return response.json()["images"][0]["image"]
