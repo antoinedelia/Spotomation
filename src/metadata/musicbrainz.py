@@ -23,6 +23,7 @@ class MusicBrainz():
         response = requests.get(self.api_base_url + "release", params=params)
         if response.status_code != 200:
             self.logger.error(f"MusicBrainz API returned {response.status_code}. Response: {response.json()}")
+            return None
 
         releases = response.json()["releases"]
 
@@ -94,6 +95,7 @@ class MusicBrainz():
         response = requests.get(self.api_base_url + "release/" + id, params=params)
         if response.status_code != 200:
             self.logger.error(f"MusicBrainz API returned {response.status_code}. Response: {response.json()}")
+            return None
 
         data = {
             "artists": [credited["artist"]["name"] for credited in response.json()["artist-credit"]],
