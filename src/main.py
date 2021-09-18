@@ -37,16 +37,32 @@ musixmatch_api.authenticate()
 musixmatch_web = MusixmatchScrapper()
 
 
-def get_lyrics(song: Song, lyrics_path: str):
+def get_lyrics(song: Song, lyrics_path: str) -> str:
     song_url = musixmatch_api.get_song_url(song)
     if song_url:
-        song.lyrics = musixmatch_web.get_lyrics_by_song_url(song_url)
-        lyrics_preview = song.lyrics.split("\n")[0]
-        logger.info(f"Lyrics found, first sentence is: {lyrics_preview}")
-        with open(lyrics_path, "w+") as f:
-            f.write(song.lyrics)
+        return musixmatch_web.get_lyrics_by_song_url(song_url)
     else:
         logger.warning(f"No lyrics found for {song.title} - {song.artists}")
+        return None
+
+
+def get_cover_art_url(song: Song) -> str:
+    song_url = musixmatch_api.get_song_url(song)
+    if song_url:
+        cover_url = musixmatch_web.get_cover_url_by_song_url(song_url)
+        if cover_url:
+            return cover_url
+    song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
+    if song_id:
+        return musicbrainz.get_cover_art_url_by_id(song_id)
+    return None
+
+
+def get_metadata(song: Song) -> dict:
+    song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
+    if song_id:
+        return musicbrainz.get_metadata_by_song_id(song_id)
+    return None
 
 
 def download_song(song: Song, mp4_path: str):
@@ -66,34 +82,27 @@ def process_song(song: Song, index: int) -> bool:
         logger.info(f"{str(song)} already exists. Skipping.")
         return True
 
-    # 3 - Get additional metadata + cover
-    song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
-    if song_id:
-        # TODO ignoring the metadata for now, must add it to the tags later
-        song_metadata = musicbrainz.get_metadata_by_song_id(song_id)  # noqa: F841
-        song.cover_url = musicbrainz.get_cover_art_url_by_id(song_id)
-    else:
-        # Trying to get cover url another way
-        song_url = musixmatch_api.get_song_url(song)
-        if song_url:
-            song.cover_url = musixmatch_web.get_cover_url_by_song_url(song_url)
+    # Trying to get cover url
+    song.cover_url = get_cover_art_url(song)
 
-    # 4 - Get the lyrics
+    # Get the lyrics
     if os.path.isfile(LYRICS_PATH):
         logger.info(f"Lyrics for {str(song)} already exist.")
     else:
-        get_lyrics(song, LYRICS_PATH)
+        song.lyrics = get_lyrics(song)
+        with open(LYRICS_PATH, "w+") as f:
+            f.write(song.lyrics)
 
-    # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...) and download it
+    # Find the best match for each track (youtube, vk, zippyshare, torrent...) and download it
     if os.path.isfile(MP4_PATH):
         logger.info(f"MP4 file for {str(song)} already exist.")
     else:
         download_song(song, MP4_PATH)
 
-    # 6 - Convert from mp4 to mp3
+    # Convert from mp4 to mp3
     subprocess.run(['ffmpeg', '-i', MP4_PATH, MP3_PATH], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    # 7 - Add the cover art to the mp3 file
+    # Add the cover art to the mp3 file
     if song.cover_url:
         audiofile = eyed3.load(MP3_PATH)
         if (audiofile.tag is None):
@@ -113,18 +122,17 @@ def main():
         import shutil
         shutil.rmtree(DOWNLOAD_PATH, ignore_errors=True)
     Path(DOWNLOAD_PATH).mkdir(parents=True, exist_ok=True)
-    # 1 - Authenticate to API services
-    sp = Spotify()
-    sp.authenticate_oauth()
 
-    # 1 - Get the Spotify Playlist URI from user
+    # Get the Spotify Playlist URI from user
     # playlist_uri = input("Enter the Spotify Playlist URI: ")
     playlist_uri = "https://open.spotify.com/playlist/6NNTBfeFTJvwxK86AtSmAk?si=86ba505492964e15"
 
-    # 2 - Get the tracks from the playlist
+    # Get the tracks from the playlist
+    sp = Spotify()
+    sp.authenticate_oauth()
     tracks = sp.get_playlist_tracks_by_uri(playlist_uri)
 
-    # 2a - Arrange the tracks in a list of Song objects
+    # Arrange the tracks in a list of Song objects
     songs = [
         Song(
             title=track["name"],
