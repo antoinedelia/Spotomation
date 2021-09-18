@@ -99,8 +99,8 @@ class MusicBrainz():
             "artists": [credited["artist"]["name"] for credited in response.json()["artist-credit"]],
             "title": response.json()["title"],
             "album": response.json()["release-group"]["title"],
-            "release_date": response.json()["date"],
-            "genres": response.json()["genres"]
+            "release_date": response.json().get("date"),
+            "genres": response.json().get("genres")
         }
 
         return data
