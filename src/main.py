@@ -1,12 +1,19 @@
+import os.path
+from pathlib import Path
 from spotify import Spotify
 from metadata.musicbrainz import MusicBrainz
 from song import Song
 from logger import Logger
 from lyrics.musixmatch import MusixmatchApi, MusixmatchScrapper
+from download.youtube import YoutubeWeb
+
+DOWNLOAD_PATH = "./Downloads/"
 
 
 def main():
     logger = Logger("Main")
+
+    Path(DOWNLOAD_PATH).mkdir(parents=True, exist_ok=True)
     # 1 - Authenticate to API services
     sp = Spotify()
     sp.authenticate_oauth()
@@ -27,7 +34,7 @@ def main():
 
     # 2a - Arrange the tracks in a list of Song objects
     songs = []
-    for track in tracks:
+    for index, track in enumerate(tracks):
         song = Song(
             title=track["name"],
             artists=[artist["name"] for artist in track["artists"]],
@@ -35,6 +42,13 @@ def main():
             release_date=track["album"]["name"],
             length_ms=track["duration_ms"],
         )
+
+        download_file_path = f"{DOWNLOAD_PATH}{index}. {str(song)}"
+        file_path = f"{index}. {str(song)}"
+
+        if os.path.isfile(f"{download_file_path}.mp4"):
+            logger.info(f"{str(song)} already exists. Skipping.")
+            continue
 
         # 3 - Get additional metadata + cover
         song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
@@ -53,14 +67,19 @@ def main():
             song.lyrics = musixmatch_web.get_lyrics_by_song_url(song_url)
             lyrics_preview = song.lyrics.split("\n")[0]
             logger.info(f"Lyrics found, first sentence is: {lyrics_preview}")
+            with open(f"{download_file_path}.txt", "w+") as f:
+                f.write(song.lyrics)
         else:
             logger.warning(f"No lyrics found for {song.title} - {song.artists}")
 
+        # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...) and download it
+        youtube = YoutubeWeb()
+        video_url = youtube.get_video_url(song)
+        if video_url:
+            logger.info(f"Video found: {video_url}")
+            youtube.download_video_by_url(video_url, file_path, DOWNLOAD_PATH)
+
         songs.append(song)
-
-    # 5 - Find the best match for each track (youtube, vk, zippyshare, torrent...)
-
-    # 6 - Download the best match
 
 
 if __name__ == '__main__':
