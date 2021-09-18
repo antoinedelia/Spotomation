@@ -12,6 +12,7 @@ class MusixmatchApi:
     def __init__(self) -> None:
         self.client = None
         self.api_base_url = "https://api.musixmatch.com/ws/1.1/"
+        self.no_cover_url = "https://s.mxmcdn.net/site/images/albums/nocover_new-350x350.png"
         self.logger = Logger("MusixmatchApi")
 
     def authenticate(self, api_key: str = MUSIXMATCH_API_KEY) -> bool:
@@ -104,5 +105,10 @@ class MusixmatchScrapper:
 
         soup = BeautifulSoup(html_content, 'html.parser')
         tags = soup.find_all("div", class_="banner-album-image-desktop")
+        if len(tags) == 0:
+            self.logger.warning(f"Could not find the cover url for song: {song_url}")
+            return None
         cover_url = tags[0].img["src"]
+        if cover_url == self.no_cover_url:
+            return None
         return f"https:{cover_url}"
