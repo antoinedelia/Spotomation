@@ -12,7 +12,6 @@ class MusixmatchApi:
     def __init__(self) -> None:
         self.client = None
         self.api_base_url = "https://api.musixmatch.com/ws/1.1/"
-        self.no_cover_url = "https://s.mxmcdn.net/site/images/albums/nocover_new-350x350.png"
         self.logger = Logger("MusixmatchApi")
 
     def authenticate(self, api_key: str = MUSIXMATCH_API_KEY) -> bool:
@@ -87,6 +86,7 @@ class MusixmatchScrapper:
     def __init__(self) -> None:
         self.logger = Logger("MusixmatchScrapper")
         self.base_url = "https://musixmatch.com/"
+        self.no_cover_url = "https://s.mxmcdn.net/site/images/albums/nocover_new-350x350.png"
 
     def get_lyrics_by_song_url(self, song_url: str) -> str:
         lyrics = ""

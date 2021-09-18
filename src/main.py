@@ -37,7 +37,7 @@ musixmatch_api.authenticate()
 musixmatch_web = MusixmatchScrapper()
 
 
-def get_lyrics(song: Song, lyrics_path: str) -> str:
+def get_lyrics(song: Song) -> str:
     song_url = musixmatch_api.get_song_url(song)
     if song_url:
         return musixmatch_web.get_lyrics_by_song_url(song_url)
