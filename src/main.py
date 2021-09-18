@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 from pathlib import Path
@@ -12,6 +13,16 @@ from song import Song
 from logger import Logger
 from lyrics.musixmatch import MusixmatchApi, MusixmatchScrapper
 from download.youtube import YoutubeWeb
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--delete', '-d', required=False, action='store_true',
+                    help='Delete the destination folder before starting',
+                    dest='should_delete')
+
+args = parser.parse_args()
+
+SHOULD_DELETE = args.should_delete
 
 DOWNLOAD_PATH = "./Downloads/"
 POOL_SIZE = 5
@@ -97,7 +108,10 @@ def process_song(song: Song, index: int) -> bool:
 
 
 def main():
-
+    if SHOULD_DELETE:
+        logger.info("Deleting destination folder...")
+        import shutil
+        shutil.rmtree(DOWNLOAD_PATH, ignore_errors=True)
     Path(DOWNLOAD_PATH).mkdir(parents=True, exist_ok=True)
     # 1 - Authenticate to API services
     sp = Spotify()
