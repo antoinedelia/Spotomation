@@ -33,6 +33,7 @@ class MusixmatchApi:
             "q_track_artist": search_query,
             "s_track_rating": "desc"
         }
+        self.logger.info(f"Searching for song: {search_query}")
         response = requests.get(self.api_base_url + "track.search", params=self._build_params(params))
         if response.status_code != 200:
             self.logger.warning(f"Failed to get song url for song: {song}")
@@ -40,7 +41,29 @@ class MusixmatchApi:
         if (status_code := response.json()["message"]["header"]["status_code"]) != 200:
             self.logger.warning(f"Got an HTTP code {status_code} from Musixmatch for song: {song}")
             return None
-        track_url = response.json()["message"]["body"]["track_list"][0]["track"]["track_share_url"]
+        tracklist = response.json()["message"]["body"]["track_list"]
+
+        if len(tracklist) == 0:
+            self.logger.warning("Could not find the song, Trying with only the artists.")
+            artists = " ".join(song.artists)
+            params = {
+                "q_track_artist": artists,
+                "s_track_rating": "desc"
+            }
+            response = requests.get(self.api_base_url + "track.search", params=self._build_params(params))
+            if response.status_code != 200:
+                self.logger.warning(f"Failed to get song url for song: {song}")
+                return None
+            if (status_code := response.json()["message"]["header"]["status_code"]) != 200:
+                self.logger.warning(f"Got an HTTP code {status_code} from Musixmatch for song: {song}")
+                return None
+            tracklist = response.json()["message"]["body"]["track_list"]
+
+        if len(tracklist) == 0:
+            self.logger.warning(f"Could not find the song: {song}")
+            return None
+
+        track_url = tracklist[0]["track"]["track_share_url"]
         track_url = track_url.split("?")[0]
         return track_url
 
