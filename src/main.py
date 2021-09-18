@@ -1,8 +1,8 @@
 from spotify import Spotify
-from musicbrainz import MusicBrainz
+from metadata.musicbrainz import MusicBrainz
 from song import Song
 from logger import Logger
-from musixmatch import MusixmatchApi, MusixmatchScrapper
+from lyrics.musixmatch import MusixmatchApi, MusixmatchScrapper
 
 
 def main():
