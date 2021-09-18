@@ -23,8 +23,7 @@ class YoutubeWeb:
         video_url = 'http://youtu.be' + results[0]['url_suffix'].replace('watch?v=', '')
         return video_url
 
-    def download_video_by_url(self, url: str, filename: str = None, download_path: str = "./Downloads/") -> None:
-        if filename and not filename.endswith(".mp4"):
-            filename = f"{filename}.mp4"
+    def download_video_by_url(self, url: str, mp4_path: str) -> None:
         youtube = YouTube(url).streams.get_audio_only()
-        youtube.download(download_path, filename=filename)
+        directory, filename = mp4_path.rsplit('/', 1)
+        youtube.download(directory, filename=filename)

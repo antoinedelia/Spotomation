@@ -97,3 +97,12 @@ class MusixmatchScrapper:
         for tag in tags:
             lyrics += tag.get_text().strip()
         return lyrics
+
+    def get_cover_url_by_song_url(self, song_url: str) -> str:
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0'}
+        html_content = requests.get(song_url, headers=headers).content.decode('utf-8')
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        tags = soup.find_all("div", class_="banner-album-image-desktop")
+        cover_url = tags[0].img["src"]
+        return f"https:{cover_url}"

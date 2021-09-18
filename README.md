@@ -1,5 +1,9 @@
 # Spotify 2 Mp3
 
+## Prerequisites
+
+Install [ffmpeg](https://www.ffmpeg.org/download.html)
+
 ## Getting Started
 
 Create a new application in the [Spotify Dashboard](https://developer.spotify.com/dashboard/applications).
