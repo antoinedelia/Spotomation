@@ -108,7 +108,12 @@ class MusicBrainz():
         return data
 
     def get_cover_art_url_by_id(self, id: str) -> str:
-        response = requests.get(self.covert_art_url + "release/" + id)
+        try:
+            response = requests.get(self.covert_art_url + "release/" + id, timeout=5)
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):
+            self.logger.warning(f"Timeout for release {id}")
+            return None
+
         if response.status_code == 404:
             self.logger.warning(f"Cover art not found for release {id}")
             return None
