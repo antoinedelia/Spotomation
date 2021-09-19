@@ -49,12 +49,12 @@ def get_lyrics(song: Song) -> str:
     if song_url:
         return musixmatch_web.get_lyrics_by_song_url(song_url)
     else:
-        logger.warning(f"No lyrics found for {song.title} - {song.artists}")
+        logger.info(f"No lyrics found for {song.title} - {song.artists}")
         return None
 
 
 def get_metadata(song: Song) -> dict:
-    song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
+    song_id = musicbrainz.find_song_id(song)
     if song_id:
         return musicbrainz.get_metadata_by_song_id(song_id)
     return None
@@ -128,7 +128,8 @@ def main():
         if SHOULD_IGNORE_INPUT:
             response = "y"
         else:
-            response = input(f"You are about to delete the entire content of the directory {DOWNLOAD_PATH}. Are you sure you want to continue? (y/n): ")
+            response = input(f"You are about to delete the entire content of the directory {DOWNLOAD_PATH}."
+                             "Are you sure you want to continue? (y/n): ")
         if response != "y":
             logger.info("Skipping deletion of destination folder.")
         else:
