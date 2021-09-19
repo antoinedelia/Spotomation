@@ -44,7 +44,7 @@ class MusixmatchApi:
         tracklist = response.json()["message"]["body"]["track_list"]
 
         if len(tracklist) == 0:
-            self.logger.warning("Could not find the song, Trying with only the artists.")
+            self.logger.warning(f"Could not find the song for {search_query}, trying with only the artists.")
             artists = " ".join(song.artists)
             params = {
                 "q_track_artist": artists,

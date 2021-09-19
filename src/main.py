@@ -48,18 +48,6 @@ def get_lyrics(song: Song) -> str:
         return None
 
 
-def get_cover_art_url(song: Song) -> str:
-    song_url = musixmatch_api.get_song_url(song)
-    if song_url:
-        cover_url = musixmatch_web.get_cover_url_by_song_url(song_url)
-        if cover_url:
-            return cover_url
-    song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
-    if song_id:
-        return musicbrainz.get_cover_art_url_by_id(song_id)
-    return None
-
-
 def get_metadata(song: Song) -> dict:
     song_id = musicbrainz.find_song_id(title=song.title, artists=song.artists, album=song.album)
     if song_id:
@@ -83,9 +71,6 @@ def process_song(song: Song, index: int) -> bool:
     if os.path.isfile(MP3_PATH):
         logger.info(f"{str(song)} already exists. Skipping.")
         return True
-
-    # Trying to get cover url
-    song.cover_url = get_cover_art_url(song)
 
     # Get the lyrics
     if os.path.isfile(LYRICS_PATH):
@@ -157,6 +142,7 @@ def main():
             album=track["album"]["name"],
             release_date=track["album"]["name"],
             length_ms=track["duration_ms"],
+            cover_url=track["album"]["images"][0]["url"],
         ) for track in tracks]
 
     logger.info(f"Found {len(songs)} tracks in the playlist.")
