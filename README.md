@@ -1,4 +1,6 @@
-# Spotify 2 Mp3
+# Spotomation
+
+Automate the download of your Spotify playlists.
 
 ## Prerequisites
 

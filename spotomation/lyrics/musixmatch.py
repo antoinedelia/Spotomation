@@ -1,7 +1,7 @@
 import os
 import requests
 from logger import Logger
-from song import Song
+from models.song import Song
 from bs4 import BeautifulSoup
 
 MUSIXMATCH_API_KEY = os.getenv("MUSIXMATCH_API_KEY")

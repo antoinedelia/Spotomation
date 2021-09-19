@@ -11,7 +11,7 @@ from tqdm import tqdm
 import istarmap  # noqa F401
 from spotify import Spotify
 from metadata.musicbrainz import MusicBrainz
-from song import Song
+from models.song import Song
 from logger import Logger
 from lyrics.musixmatch import MusixmatchApi, MusixmatchScrapper
 from download.youtube import YoutubeWeb
@@ -22,9 +22,14 @@ parser.add_argument('--delete', '-d', required=False, action='store_true',
                     help='Delete the destination folder before starting',
                     dest='should_delete')
 
+parser.add_argument('--force', '-f', required=False, action='store_true',
+                    help='Force the execution of the script, skipping any potential input from the user',
+                    dest='should_ignore_input')
+
 args = parser.parse_args()
 
 SHOULD_DELETE = args.should_delete
+SHOULD_IGNORE_INPUT = args.should_ignore_input
 
 DOWNLOAD_PATH = "./Downloads/"
 POOL_SIZE = 5
@@ -120,14 +125,26 @@ def process_song(song: Song, index: int) -> bool:
 
 def main():
     if SHOULD_DELETE:
-        logger.info("Deleting destination folder...")
-        import shutil
-        shutil.rmtree(DOWNLOAD_PATH, ignore_errors=True)
+        if SHOULD_IGNORE_INPUT:
+            response = "y"
+        else:
+            response = input(f"You are about to delete the entire content of the directory {DOWNLOAD_PATH}. Are you sure you want to continue? (y/n): ")
+        if response != "y":
+            logger.info("Skipping deletion of destination folder.")
+        else:
+            logger.info("Deleting destination folder...")
+            import shutil
+            shutil.rmtree(DOWNLOAD_PATH, ignore_errors=True)
+
     Path(DOWNLOAD_PATH).mkdir(parents=True, exist_ok=True)
 
     # Get the Spotify Playlist URI from user
-    # playlist_uri = input("Enter the Spotify Playlist URI: ")
-    playlist_uri = os.getenv("SPOTIFY_PLAYLIST_URI")
+    if os.getenv("SPOTIFY_PLAYLIST_URI"):
+        logger.info("Using Spotify playlist URI from environment variable.")
+        playlist_uri = os.getenv("SPOTIFY_PLAYLIST_URI")
+    else:
+        if not SHOULD_IGNORE_INPUT:
+            playlist_uri = input("Enter the Spotify Playlist URI: ")
 
     # Get the tracks from the playlist
     sp = Spotify()

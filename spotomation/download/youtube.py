@@ -1,6 +1,6 @@
 from pytube import YouTube
 from youtube_search import YoutubeSearch
-from song import Song
+from models.song import Song
 from logger import Logger
 from datetime import timedelta
 
