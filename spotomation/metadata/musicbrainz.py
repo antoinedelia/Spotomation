@@ -1,6 +1,7 @@
 import requests
 from dataclasses import dataclass
 from logger import Logger
+from models.song import Song
 
 
 @dataclass
@@ -12,9 +13,9 @@ class MusicBrainz():
     def authenticate(self):
         pass
 
-    def find_song_id(self, title: str = None, artists: list = [], album: str = None) -> str:
-        artists_as_string = " ".join(artists)
-        query = f"{title} {artists_as_string} {album}"
+    def find_song_id(self, song: Song) -> str:
+        artists_as_string = " ".join(song.artists)
+        query = f"{song.title} {artists_as_string}"
         params = {
             "fmt": "json",
             "query": query
@@ -27,51 +28,27 @@ class MusicBrainz():
 
         releases = response.json()["releases"]
 
-        if len(releases) == 0:
-            self.logger.warning(f"No release found for {title} - {artists} - {album}")
+        if not releases:
+            self.logger.warning(f"No release found for {song.title} - {song.artists}")
             return None
 
         # Try to find the most exact match
-        exact_matches = self._filter_releases_by_artists(releases, artists)
+        artists_matches = self._filter_releases_by_artists(releases, song.artists)
 
         # If there is exactly one match, we return it
-        if len(exact_matches) == 1:
-            self.logger.info(f"Found exact match with artists: {artists}.")
-            return exact_matches[0]["id"]
+        if len(artists_matches) == 1:
+            self.logger.info(f"Found exact match with artists: {song.artists}.")
+            return artists_matches[0]["id"]
 
-        # If there is no exact match for the title, we try to look with the title, then the album
-        if len(exact_matches) == 0:
-            self.logger.debug(f"No exact match found for artists: {artists}.")
-            exact_matches = self._filter_releases_by_title(releases, title)
-            if len(exact_matches) == 0:
-                self.logger.debug(f"No exact match found for title: {title}.")
-                exact_matches = self._filter_releases_by_album(releases, album)
-                if len(exact_matches) == 0:
-                    self.logger.debug(f"No exact match found for album: {album}.")
-                    return None
+        self.logger.info(f"Found {len(artists_matches)} match(es) with artists. Trying to filter with the title")
+        matches_to_filter = artists_matches or releases
 
-        # If there are multiple matches, we try to filter with the title or the album
-        # This is very messy, should think of a better way to do it
-        if len(exact_matches) > 1:
-            self.logger.info(f"Multiple matches ({len(exact_matches)}) found.")
-            new_exact_matches = self._filter_releases_by_title(exact_matches, title)
-            if len(new_exact_matches) == 1:
-                self.logger.info(f"Found exact match with title {title} and artists {artists}.")
-                return new_exact_matches[0]["id"]
-            if len(new_exact_matches) == 0:
-                final_exact_matches = self._filter_releases_by_album(exact_matches, album)
-                if len(final_exact_matches) >= 1:
-                    self.logger.info(f"Found multiple matches {(len(final_exact_matches))} even with album.")
-                    return final_exact_matches[0]["id"]
-                if len(final_exact_matches) == 0:
-                    return exact_matches[0]["id"]
-            if len(new_exact_matches) > 1:
-                self.logger.info(f"Found multiple matches ({len(new_exact_matches)}) with title.")
-                final_exact_matches = self._filter_releases_by_album(new_exact_matches, album)
-                if len(final_exact_matches) >= 1:
-                    return final_exact_matches[0]["id"]
-                if len(final_exact_matches) == 0:
-                    return new_exact_matches[0]["id"]
+        final_matches = self._filter_releases_by_title(matches_to_filter, song.title)
+
+        if final_matches:
+            return final_matches[0]["id"]
+        else:
+            return matches_to_filter[0]["id"]
 
     def _filter_releases_by_title(self, releases: list, title: str) -> list:
         return [release for release in releases if release["title"].upper() == title.upper()]
