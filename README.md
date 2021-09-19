@@ -41,3 +41,4 @@ We can't really get the lyrics, as both the Genius and MusixMatch APIs are limit
 - [pytube](https://pytube.io/en/latest/) (Youtube video downloader)
 - [youtube-search](https://github.com/joetats/youtube_search) (Youtube video search)
 - [eyeD3](https://eyed3.readthedocs.io/en/latest/) (ID3 tags)
+- [tqdm](https://github.com/tqdm/tqdm) (progress bar)
