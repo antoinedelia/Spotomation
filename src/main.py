@@ -92,8 +92,6 @@ def process_song(song: Song, index: int) -> bool:
         logger.info(f"Lyrics for {str(song)} already exist.")
     else:
         song.lyrics = get_lyrics(song)
-        with open(LYRICS_PATH, "w+") as f:
-            f.write(song.lyrics)
 
     # Find the best match for each track (youtube, vk, zippyshare, torrent...) and download it
     if os.path.isfile(MP4_PATH):
@@ -117,6 +115,23 @@ def process_song(song: Song, index: int) -> bool:
         audiofile.tag.save(version=ID3_V2_3)
         logger.info(f"Cover art {song.cover_url} added to {str(song)}")
 
+    # Add the lyrics to the mp3 file
+    if song.lyrics:
+        audiofile = eyed3.load(MP3_PATH)
+        if (audiofile.tag is None):
+            audiofile.initTag()
+
+        audiofile.tag.lyrics.set(song.lyrics)
+
+        audiofile.tag.save(version=ID3_V2_3)
+        logger.info(f"Lyrics added to {str(song)}")
+
+    # Cleanup the mp4 file
+    try:
+        os.remove(MP4_PATH)
+    except FileNotFoundError:
+        pass
+
 
 def main():
     if SHOULD_DELETE:
@@ -127,7 +142,7 @@ def main():
 
     # Get the Spotify Playlist URI from user
     # playlist_uri = input("Enter the Spotify Playlist URI: ")
-    playlist_uri = "https://open.spotify.com/playlist/0JP3smzah2mTnxIZIVjVX0?si=28b345b00c9941be"
+    playlist_uri = os.getenv("SPOTIFY_PLAYLIST_URI")
 
     # Get the tracks from the playlist
     sp = Spotify()
