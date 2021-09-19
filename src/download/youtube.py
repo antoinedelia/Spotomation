@@ -2,6 +2,7 @@ from pytube import YouTube
 from youtube_search import YoutubeSearch
 from song import Song
 from logger import Logger
+from datetime import timedelta
 
 
 class YoutubeWeb:
@@ -14,13 +15,35 @@ class YoutubeWeb:
 
         self.logger.info(f"Searching for song: {song_query}")
 
-        results = YoutubeSearch(song_query, max_results=1).to_dict()
+        results = YoutubeSearch(song_query, max_results=5).to_dict()
 
         if len(results) == 0:
             self.logger.warning(f"No results for query: {song_query}")
             return None
 
-        video_url = 'http://youtu.be' + results[0]['url_suffix'].replace('watch?v=', '')
+        # Try to find the most exact match based on duration
+        possible_matches = []
+        for result in results:
+            video_duration = result['duration']
+
+            hours, minutes, seconds = 0, 0, 0
+            if video_duration.count(':') == 1:
+                minutes, seconds = map(float, video_duration.split(':'))
+            else:
+                hours, minutes, seconds = map(float, video_duration.split(':'))
+
+            video_duration_ms = int(timedelta(hours=hours, minutes=minutes, seconds=seconds).total_seconds() * 1000)
+
+            # We consider 5 seconds to be a good match
+            if abs(video_duration_ms - song.length_ms) < 5000:
+                possible_matches.append(result)
+
+        if len(possible_matches) == 0:
+            self.logger.warning(f"No exact match found for song: {song_query}")
+            video_url = 'http://youtu.be' + results[0]['url_suffix'].replace('watch?v=', '')
+            return video_url
+
+        video_url = 'http://youtu.be' + possible_matches[0]['url_suffix'].replace('watch?v=', '')
         return video_url
 
     def download_video_by_url(self, url: str, mp4_path: str) -> None:
