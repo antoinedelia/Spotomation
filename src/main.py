@@ -7,6 +7,8 @@ from multiprocessing.dummy import Pool as ThreadPool
 import eyed3
 from eyed3.id3.frames import ImageFrame
 from eyed3.id3 import ID3_V2_3
+from tqdm import tqdm
+import istarmap  # noqa F401
 from spotify import Spotify
 from metadata.musicbrainz import MusicBrainz
 from song import Song
@@ -125,7 +127,7 @@ def main():
 
     # Get the Spotify Playlist URI from user
     # playlist_uri = input("Enter the Spotify Playlist URI: ")
-    playlist_uri = "https://open.spotify.com/playlist/6NNTBfeFTJvwxK86AtSmAk?si=86ba505492964e15"
+    playlist_uri = "https://open.spotify.com/playlist/0JP3smzah2mTnxIZIVjVX0?si=28b345b00c9941be"
 
     # Get the tracks from the playlist
     sp = Spotify()
@@ -144,10 +146,12 @@ def main():
 
     logger.info(f"Found {len(songs)} tracks in the playlist.")
 
-    pool_songs = [(song, index) for index, song in enumerate(songs)]
+    pool_songs = [(song, index+1) for index, song in enumerate(songs)]
 
     pool = ThreadPool(POOL_SIZE)
-    pool.starmap(process_song, pool_songs)
+
+    for _ in tqdm(pool.istarmap(process_song, pool_songs), total=len(pool_songs)):
+        pass
 
     pool.close()
     pool.join()
