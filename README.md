@@ -16,13 +16,13 @@ Create a new application in the [Musixmatch Dashboard](https://developer.musixma
 $ pip install -r requirements.txt
 
 # Spotify Credentials
-$ export SPOTIPY_CLIENT_ID='your-client-id'
-$ export SPOTIPY_CLIENT_SECRET='your-client-secret' 
+$ export SPOTIPY_CLIENT_ID="your-client-id"
+$ export SPOTIPY_CLIENT_SECRET="your-client-secret"
 
 # Musixmatch Credentials
-$ export MUSIXMATCH_API_KEY='your-api-key' 
+$ export MUSIXMATCH_API_KEY="your-api-key"
 
-$ python src/main.py
+$ python spotomation/main.py
 ```
 
 ## FAQ
@@ -36,8 +36,7 @@ We can't really get the lyrics, as both the Genius and MusixMatch APIs are limit
 - [requests](https://docs.python-requests.org/en/latest/) (http api calls)
 - [spotipy](https://spotipy.readthedocs.io/en/2.19.0/) (Spotify Python client)
 - [MusicBrainz](https://musicbrainz.org/doc/MusicBrainz_API) (metadata)
-- [Cover Art Archive](https://musicbrainz.org/doc/Cover_Art_Archive/API) (cover art)
-- [Musixmatch](https://www.musixmatch.com/) (lyrics/ cover art)
+- [Musixmatch](https://www.musixmatch.com/) (lyrics)
 - [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) (html parsing)
 - [ffmpeg](https://www.ffmpeg.org/) (conversion)
 - [pytube](https://pytube.io/en/latest/) (Youtube video downloader)

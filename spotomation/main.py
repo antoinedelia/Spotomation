@@ -18,13 +18,13 @@ from download.youtube import YoutubeWeb
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--delete', '-d', required=False, action='store_true',
-                    help='Delete the destination folder before starting',
-                    dest='should_delete')
+parser.add_argument("--delete", "-d", required=False, action="store_true",
+                    help="Delete the destination folder before starting",
+                    dest="should_delete")
 
-parser.add_argument('--force', '-f', required=False, action='store_true',
-                    help='Force the execution of the script, skipping any potential input from the user',
-                    dest='should_ignore_input')
+parser.add_argument("--force", "-f", required=False, action="store_true",
+                    help="Force the execution of the script, skipping any potential input from the user",
+                    dest="should_ignore_input")
 
 args = parser.parse_args()
 
@@ -90,7 +90,7 @@ def process_song(song: Song, index: int) -> bool:
         download_song(song, MP4_PATH)
 
     # Convert from mp4 to mp3
-    subprocess.run(['ffmpeg', '-i', MP4_PATH, MP3_PATH], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["ffmpeg", "-i", MP4_PATH, MP3_PATH], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # Add the cover art to the mp3 file
     if song.cover_url:
@@ -100,7 +100,7 @@ def process_song(song: Song, index: int) -> bool:
 
         import requests
         image = requests.get(song.cover_url, stream=True)
-        audiofile.tag.images.set(ImageFrame.FRONT_COVER, image.content, 'image/jpeg')
+        audiofile.tag.images.set(ImageFrame.FRONT_COVER, image.content, "image/jpeg")
 
         audiofile.tag.save(version=ID3_V2_3)
         logger.info(f"Cover art {song.cover_url} added to {str(song)}")
@@ -175,7 +175,7 @@ def main():
     pool.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_time = time.time()
     main()
     duration = round(time.time() - start_time, 2)

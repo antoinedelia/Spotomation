@@ -23,18 +23,18 @@ class Spotify:
         :param uri: playlist uri
         :return: playlist
         """
-        playlist_id = uri.split('/')[-1]
+        playlist_id = uri.split("/")[-1]
         if "?" in playlist_id:
-            playlist_id = playlist_id.split('?')[0]
+            playlist_id = playlist_id.split("?")[0]
 
         tracks = []
         results = self.client.playlist_items(playlist_id=playlist_id)
-        while results['next']:
-            for item in results['items']:
-                tracks.append(item['track'])
+        while results["next"]:
+            for item in results["items"]:
+                tracks.append(item["track"])
             results = self.client.next(results)
 
         # We do an extra for loop to get the last tracks
-        for item in results['items']:
-            tracks.append(item['track'])
+        for item in results["items"]:
+            tracks.append(item["track"])
         return tracks

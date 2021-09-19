@@ -90,20 +90,20 @@ class MusixmatchScrapper:
 
     def get_lyrics_by_song_url(self, song_url: str) -> str:
         lyrics = ""
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0'}
-        html_content = requests.get(song_url, headers=headers).content.decode('utf-8')
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"}
+        html_content = requests.get(song_url, headers=headers).content.decode("utf-8")
 
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, "html.parser")
         tags = soup.find_all("span", class_="lyrics__content__ok")
         for tag in tags:
             lyrics += tag.get_text().strip()
         return lyrics
 
     def get_cover_url_by_song_url(self, song_url: str) -> str:
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0'}
-        html_content = requests.get(song_url, headers=headers).content.decode('utf-8')
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"}
+        html_content = requests.get(song_url, headers=headers).content.decode("utf-8")
 
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, "html.parser")
         tags = soup.find_all("div", class_="banner-album-image-desktop")
 
         if len(tags) == 0:

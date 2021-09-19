@@ -10,7 +10,7 @@ class YoutubeWeb:
         self.logger = Logger("Youtube")
 
     def get_video_url(self, song: Song) -> str:
-        artists_as_string = ' '.join(song.artists)
+        artists_as_string = " ".join(song.artists)
         song_query = f"{song.title} {artists_as_string} audio"
 
         self.logger.info(f"Searching for song: {song_query}")
@@ -28,13 +28,13 @@ class YoutubeWeb:
         # Try to find the most exact match based on duration
         possible_matches = []
         for result in results:
-            video_duration = result['duration']
+            video_duration = result["duration"]
 
             hours, minutes, seconds = 0, 0, 0
-            if video_duration.count(':') == 1:
-                minutes, seconds = map(float, video_duration.split(':'))
+            if video_duration.count(":") == 1:
+                minutes, seconds = map(float, video_duration.split(":"))
             else:
-                hours, minutes, seconds = map(float, video_duration.split(':'))
+                hours, minutes, seconds = map(float, video_duration.split(":"))
 
             video_duration_ms = int(timedelta(hours=hours, minutes=minutes, seconds=seconds).total_seconds() * 1000)
 
@@ -44,13 +44,13 @@ class YoutubeWeb:
 
         if len(possible_matches) == 0:
             self.logger.info(f"No exact match found for song: {song_query}")
-            video_url = 'http://youtu.be' + results[0]['url_suffix'].replace('watch?v=', '')
+            video_url = "http://youtu.be" + results[0]["url_suffix"].replace("watch?v=", "")
             return video_url
 
-        video_url = 'http://youtu.be' + possible_matches[0]['url_suffix'].replace('watch?v=', '')
+        video_url = "http://youtu.be" + possible_matches[0]["url_suffix"].replace("watch?v=", "")
         return video_url
 
     def download_video_by_url(self, url: str, mp4_path: str) -> None:
         youtube = YouTube(url).streams.get_audio_only()
-        directory, filename = mp4_path.rsplit('/', 1)
+        directory, filename = mp4_path.rsplit("/", 1)
         youtube.download(directory, filename=filename)
