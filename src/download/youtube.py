@@ -15,7 +15,11 @@ class YoutubeWeb:
 
         self.logger.info(f"Searching for song: {song_query}")
 
-        results = YoutubeSearch(song_query, max_results=5).to_dict()
+        try:
+            results = YoutubeSearch(song_query, max_results=5).to_dict()
+        except Exception as e:
+            self.logger.error(f"Exception while searching song: {song_query}. Exception was: {e}")
+            return None
 
         if len(results) == 0:
             self.logger.warning(f"No results for query: {song_query}")
@@ -39,7 +43,7 @@ class YoutubeWeb:
                 possible_matches.append(result)
 
         if len(possible_matches) == 0:
-            self.logger.warning(f"No exact match found for song: {song_query}")
+            self.logger.info(f"No exact match found for song: {song_query}")
             video_url = 'http://youtu.be' + results[0]['url_suffix'].replace('watch?v=', '')
             return video_url
 
