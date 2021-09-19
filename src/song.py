@@ -20,10 +20,12 @@ class Song():
         """
         String representation of song object
         """
-        return f"{self.title} - {self.artists} - {self.album}"
+        artists = " & ".join(self.artists)
+        return f"{artists} - {self.title}"
 
     def __repr__(self):
         """
         String representation of song object
         """
-        return f"{self.title} - {self.artists} - {self.album}"
+        artists = " & ".join(self.artists)
+        return f"{artists} - {self.title}"
