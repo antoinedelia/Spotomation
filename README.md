@@ -41,10 +41,7 @@ Then, build the image and run it.
 
 ```shell
 $ docker build -t python-spotomation .
-$ docker run -it --env-file env.list python-spotomation
-
-# Additionnally, you can use the keyword bash to run the container in interactive mode.
-$ docker run -it --env-file env.list python-spotomation bash
+$ docker run -it --env-file env.list -v "$(pwd)"/Downloads/:/Downloads/ python-spotomation
 ```
 
 ## FAQ
