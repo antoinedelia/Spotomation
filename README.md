@@ -25,6 +25,28 @@ $ export MUSIXMATCH_API_KEY="your-api-key"
 $ python spotomation/main.py
 ```
 
+# Using Docker
+
+Create a file called `env.list` that will contain all your environment variables.
+
+```
+SPOTIPY_CLIENT_ID=your_client_id
+SPOTIPY_CLIENT_SECRET=your_client_secret
+MUSIXMATCH_API_KEY=your_api_key
+SPOTIFY_PLAYLIST_URI=your_playlist_uri
+LOG_LEVEL=WARNING
+```
+
+Then, build the image and run it.
+
+```shell
+$ docker build -t python-spotomation .
+$ docker run -it --env-file env.list python-spotomation
+
+# Additionnally, you can use the keyword bash to run the container in interactive mode.
+$ docker run -it --env-file env.list python-spotomation bash
+```
+
 ## FAQ
 
 ### Why can't you get the lyrics directly from the API?
